@@ -1,10 +1,11 @@
 "use client"
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ComponentCard } from "@/components/ComponentCard";
 import { componentsData } from "@/data/components";
 import { Input } from "@/components/ui/input";
+import { Slider } from "../components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Github, Search, Sparkles, Filter, X } from "lucide-react";
+import { Github, Search, Sparkles, Filter, X, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Toaster } from "sonner";
@@ -12,8 +13,6 @@ import { Toaster } from "sonner";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  // Get all unique categories with counts
   const categories = useMemo(() => {
     const categoryMap = new Map<string, number>();
     componentsData.forEach(component => {
@@ -23,26 +22,18 @@ const Index = () => {
     });
     return Array.from(categoryMap.entries()).map(([name, count]) => ({ name, count }));
   }, []);
-
-  // Enhanced filtering with better search
   const filteredComponents = useMemo(() => {
     return componentsData.filter(component => {
       const searchLower = searchQuery.toLowerCase().trim();
-      
-      // Enhanced search: title, description, category, and id
-      const matchesSearch = !searchLower || 
+      const matchesSearch = !searchLower ||
         component.title.toLowerCase().includes(searchLower) ||
         component.description.toLowerCase().includes(searchLower) ||
         component.category?.toLowerCase().includes(searchLower) ||
         component.id.toLowerCase().includes(searchLower);
-      
       const matchesCategory = !selectedCategory || component.category === selectedCategory;
-      
       return matchesSearch && matchesCategory;
     });
   }, [searchQuery, selectedCategory]);
-
-  // Clear all filters
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory(null);
@@ -76,23 +67,28 @@ const Index = () => {
               Copy, paste, and customize to build amazing UIs.
             </p>
 
-            <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap px-4">
-              <Link href={"https://github.com/fahimahammed/DevUI"}>
-                <Button size="lg" className="bg-primary hover:opacity-90 transition-opacity text-sm sm:text-base">
-                  <Github className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="hidden sm:inline">Star on GitHub</span>
-                  <span className="sm:hidden">Star</span>
+            <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 px-4">
+              <div className="w-full max-w-md mx-auto">
+                <Slider defaultValue={[40]} min={0} max={100} className="my-4" />
+              </div>
+              <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
+                <Link href={"https://github.com/fahimahammed/DevUI"}>
+                  <Button size="lg" className="bg-primary hover:opacity-90 transition-opacity text-sm sm:text-base">
+                    <Github className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="hidden sm:inline">Star on GitHub</span>
+                    <span className="sm:hidden">Star</span>
+                  </Button>
+                </Link>
+                <Button size="lg" variant="outline" className="border-primary/20 hover:bg-primary/5 text-sm sm:text-base">
+                  <span className="hidden sm:inline">Browse Components</span>
+                  <span className="sm:hidden">Browse</span>
                 </Button>
-              </Link>
-              <Button size="lg" variant="outline" className="border-primary/20 hover:bg-primary/5 text-sm sm:text-base">
-                <span className="hidden sm:inline">Browse Components</span>
-                <span className="sm:hidden">Browse</span>
-              </Button>
-              <Link href="/about">
-                <Button size="lg" variant="ghost" className="text-primary font-semibold border border-primary/10 hover:bg-primary/10 text-sm sm:text-base">
-                  About Us
-                </Button>
-              </Link>
+                <Link href="/about">
+                  <Button size="lg" variant="ghost" className="text-primary font-semibold border border-primary/10 hover:bg-primary/10 text-sm sm:text-base">
+                    About Us
+                  </Button>
+                </Link>
+              </div>
             </div>
 
             <div className="flex items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
@@ -107,17 +103,17 @@ const Index = () => {
       </section>
 
       {/* Search and Filters */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
-        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-6xl mx-auto space-y-6">
           {/* Search Bar */}
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               type="text"
               placeholder="Search by name, description, or category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 pr-10 h-10 sm:h-12 text-sm sm:text-base bg-card/50 backdrop-blur-sm border-border hover:border-primary/50 focus:border-primary transition-colors dark:bg-card/30 dark:hover:bg-card/50"
+              className="pl-10 pr-10 h-12 bg-card/50 backdrop-blur-sm border-border hover:border-primary/50 focus:border-primary transition-colors dark:bg-card/30 dark:hover:bg-card/50"
             />
             {searchQuery && (
               <button
@@ -130,11 +126,10 @@ const Index = () => {
             )}
           </div>
 
-          {/* Filter Header */}
           <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
-              <Filter className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-              <span className="text-xs sm:text-sm font-medium text-foreground dark:text-foreground">Filter by Category</span>
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground dark:text-foreground">Filter by Category</span>
               {hasActiveFilters && (
                 <Badge variant="secondary" className="ml-2">
                   {filteredComponents.length} result{filteredComponents.length !== 1 ? 's' : ''}
@@ -155,10 +150,10 @@ const Index = () => {
           </div>
 
           {/* Category Badges */}
-          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap gap-2">
             <Badge
               variant={selectedCategory === null ? "default" : "outline"}
-              className="cursor-pointer hover:bg-primary/80 transition-all hover:scale-105 dark:hover:bg-primary/70 dark:border-border text-xs sm:text-sm px-2 sm:px-2.5 py-0.5 sm:py-1"
+              className="cursor-pointer hover:bg-primary/80 transition-all hover:scale-105 dark:hover:bg-primary/70 dark:border-border"
               onClick={() => setSelectedCategory(null)}
             >
               All ({componentsData.length})
@@ -167,7 +162,7 @@ const Index = () => {
               <Badge
                 key={name}
                 variant={selectedCategory === name ? "default" : "outline"}
-                className="cursor-pointer hover:bg-primary/80 transition-all hover:scale-105 dark:hover:bg-primary/70 dark:border-border text-xs sm:text-sm px-2 sm:px-2.5 py-0.5 sm:py-1"
+                className="cursor-pointer hover:bg-primary/80 transition-all hover:scale-105 dark:hover:bg-primary/70 dark:border-border"
                 onClick={() => setSelectedCategory(name)}
               >
                 {name} ({count})
